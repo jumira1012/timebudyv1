@@ -1,0 +1,35 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TimeBuddy V1</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f4f8fc;font-family:Arial,sans-serif;color:#17345b;display:flex;justify-content:center;padding:18px}
+main{width:min(100%,430px);background:white;border-radius:28px;box-shadow:0 8px 28px #16385b22;overflow:hidden;min-height:680px}
+header{background:#dff1ff;text-align:center;padding:18px}h1{margin:0;font-size:28px}header p{margin:5px 0 0}
+.screen{display:none;padding:24px}.screen.active{display:block}.mascot{text-align:center;font-size:55px;margin:8px}
+h2{text-align:center;font-size:23px}.sub{text-align:center;line-height:1.45;color:#536982}
+.choices{display:grid;gap:11px;margin:20px 0}button{border:0;border-radius:17px;padding:15px;font-size:17px;font-weight:bold;cursor:pointer;background:#e9f3ff;color:#17345b}
+button.selected{outline:3px solid #2c83bd;background:#d9efff}.primary{width:100%;background:#247fba;color:white;margin-top:10px}.primary:disabled{background:#a9c3d4;cursor:not-allowed}.secondary{width:100%;margin-top:9px;background:#edf2f6}
+.clock{border:9px solid #ffcf57;border-radius:50%;width:205px;height:205px;display:flex;align-items:center;justify-content:center;font-size:49px;font-weight:bold;margin:20px auto}
+.activity{background:#e8f7ec;border-radius:16px;padding:13px;text-align:center;margin:15px 0}
+.alert{background:#fff4d6;border-radius:18px;padding:17px;text-align:center;font-size:19px;line-height:1.4}
+.small{font-size:12px;color:#65778b;text-align:center;line-height:1.4;margin-top:18px}
+</style></head><body><main><header><h1>⭐ TimeBuddy V1</h1><p>Your time. Your choice.</p></header>
+<section id="a" class="screen active"><div class="mascot">🐢</div><h2>Choose your screen time</h2><p class="sub">Pick a time that feels right for you.</p><div class="choices">
+<button onclick="pickTime(10,this)">10 minutes</button><button onclick="pickTime(15,this)">15 minutes</button><button onclick="pickTime(20,this)">20 minutes</button></div><button id="nextA" class="primary" disabled onclick="go('b')">Next</button></section>
+<section id="b" class="screen"><div class="mascot">🎨 📚 ⚽</div><h2>Choose what comes next</h2><p class="sub">Your plan will stay visible when time is up.</p><div class="choices">
+<button onclick="pickAct('Draw',this)">🎨 Draw</button><button onclick="pickAct('Read a book',this)">📚 Read a book</button><button onclick="pickAct('Play outside',this)">⚽ Play outside</button></div><button id="startB" class="primary" disabled onclick="start()">Start my time</button><button class="secondary" onclick="go('a')">Back</button></section>
+<section id="c" class="screen"><div class="mascot">🐢</div><h2>Your plan</h2><div class="clock" id="clock">00:30</div><div class="activity" id="plan"></div><p class="sub">A gentle reminder will appear when the timer ends.</p><button class="secondary" onclick="finish()">Show time-up screen (demo)</button><p class="small">Demo countdown is 30 seconds. The tester can skip to the time-up screen. It does not enforce device-wide limits.</p></section>
+<section id="d" class="screen"><div class="mascot">🌟</div><h2>Time's up!</h2><div class="alert">You chose <b id="chosen"></b> next. Ready to start?</div><button class="primary" onclick="go('e')">Start my activity</button></section>
+<section id="e" class="screen"><div class="mascot">🎉🐢</div><h2>Nice transition!</h2><p class="sub">You made a plan and chose what comes next.</p><button class="primary" onclick="reset()">Finish</button></section>
+
+</main><script>
+let mins=null,act=null,left=30,timer,sound=false,reactStart=null;
+function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active')}
+function pickTime(v,b){mins=v;document.querySelectorAll('#a .choices button').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');document.getElementById('nextA').disabled=false}
+function pickAct(v,b){act=v;document.querySelectorAll('#b .choices button').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');document.getElementById('startB').disabled=false}
+function start(){document.getElementById('plan').textContent='Next activity: '+act;go('c');left=30;tick()}
+function tick(){clearInterval(timer);draw();timer=setInterval(()=>{left--;draw();if(left<=0)finish()},1000)}
+function draw(){document.getElementById('clock').textContent='00:'+String(Math.max(left,0)).padStart(2,'0')}
+function beep(){try{const c=new (window.AudioContext||window.webkitAudioContext)(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);g.gain.value=0.05;o.frequency.value=660;o.start();o.stop(c.currentTime+0.4)}catch(e){}}
+function toggleSound(b){sound=!sound;b.textContent=sound?'🔔 Sound: on':'🔕 Sound: off'}
+function finish(){clearInterval(timer);document.getElementById('chosen').textContent=act;if(sound)beep();go('d')}
+function reset(){clearInterval(timer);mins=null;act=null;document.querySelectorAll('button.selected').forEach(x=>x.classList.remove('selected'));document.getElementById('nextA').disabled=true;document.getElementById('startB').disabled=true;go('a')}
+</script></body></html>
